@@ -75,3 +75,98 @@ function createScene() {
   };
 };
 
+// EVENT FUNCTIONS
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+};
+
+function onDocumentMouseDown(event) {
+  isMouseDown = true;
+  onMouseDownTheta = theta;
+  onMouseDownPhi = phi;
+  onMouseDownPosition.x = event.clientX;
+  onMouseDownPosition.y = event.clientY;
+  mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+  mouse.y = (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  var intersects = raycaster.intersectObjects(scene.children); // if mouse intersects a cube
+  if (intersects.length > 0) {
+    new TWEEN.Tween(intersects[0].object.position).to({
+          x: Math.random() * 800 - 400,
+          y: Math.random() * 800 - 432,
+          z: Math.random() * 800 - 777,
+        }, 2000)
+        .easing(TWEEN.Easing.Elastic.Out).start(); // moves cube
+    new TWEEN.Tween(intersects[0].object.rotation).to({
+          x: Math.random() * 2 * Math.PI,
+          y: Math.random() * 2 * Math.PI,
+          z: Math.random() * 2 * Math.PI,
+        }, 2000)
+        .easing(TWEEN.Easing.Elastic.Out).start(); // rotates cube
+    count += 1;
+    document.getElementById('score').innerHTML = `Score: ${count}`;
+  };
+};
+
+function onDocumentMouseMove(event) {
+  if (isMouseDown) {
+    theta = -((event.clientX - onMouseDownPosition.x) * 0.5) + onMouseDownTheta;
+    phi = ((event.clintY - onMouseDownPosition.y) * 0.5) + onMouseDownPhi;
+
+    phi = Math.min(180, Math.max(0, phi));
+
+    camera.position.x = radius * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360);
+    camera.position.y = radius * Math.sin(phi * Math.PI / 360);
+    camera.position.z = radius * Math.cos(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360);
+    camera.updateMatrix();
+  };
+};
+
+function onDocumentMouseUp(event) {
+  isMouseDown = false;
+};
+
+// BUILDING GAME
+
+function init() {
+  container = document.createElement('div');
+  document.body.appendChild(container);
+  setHeader();
+  setScore();
+  camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
+  camera.position.y = 360;
+  camera.position.z = 555;
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+  stats = new Stats();
+  container.appendChild(stats.dom);
+
+  createScene();
+  onMouseDownPosition = new THREE.Vector2();
+  document.addEventListener('mousedown', onDocumentMouseDown, false);
+  document.addEventListener('mousemove', onDocumentMouseMove, false);
+  document.addEventListener('mouseup', onDocumentMouseUp, false);
+  window.addEventListener('resize', onWindowResize, false);
+};
+
+function animate() {
+  requestAnimationFrame(animate);
+  render();
+  stats.update();
+};
+
+function render() {
+  TWEEN.update();
+  theta += 0.1;
+  camera.position.x = radius * Math.sin(THREE.Math.degToRad(theta));
+  camera.position.y = radius * Math.sin(THREE.Math.degToRad(theta));
+  camera.position.z = radius * Math.cos(THREE.Math.degToRad(theta));
+  camera.lookAt(scene.position);
+  renderer.render(scene, camera);
+}
+
+init();
+animate();
