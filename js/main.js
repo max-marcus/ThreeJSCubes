@@ -36,3 +36,42 @@ function createGeometry() {
   return object;
 };
 
+function setHeader() {
+  var info = document.createElement('div');
+  info.style.position = 'absolute';
+  info.style.top = '10px';
+  info.style.width = '100%';
+  info.style.textAlign = 'center';
+  info.innerHTML = '<a href="http://jscrambler.com" target="_blank">Jscrambler</a> - Three.js cube example';
+  container.appendChild(info);
+};
+
+function setScore() {
+  var info = document.createElement('div');
+  info.id = 'score';
+  info.style.position = 'absolute';
+  info.style.top = '30px';
+  info.style.width = '100%';
+  info.styletextAlign = 'center';
+  info.innerHTML = `Score: ${count}`;
+  container.appendChild(info);
+};
+
+function createScene() {
+  scene = new THREE.Scene();
+  renderer = new THREE.WebGLRenderer({
+    antialias: true
+  });
+  renderer.autoClear = true;
+  renderer = new THREE.CanvasRenderer();
+  renderer.setClearColor(0xf0f0f0);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  container.appendChild(renderer.domElement);
+
+  for (var i = 0; i < numCubes; i++) {
+    var geometry = createGeometry();
+    scene.add(geometry);
+  };
+};
+
